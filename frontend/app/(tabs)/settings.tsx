@@ -21,7 +21,10 @@ import {
   Trash2,
   ChevronRight,
   Sunrise,
+  Wallet,
+  ListChecks,
 } from 'lucide-react-native';
+import { useRouter } from 'expo-router';
 import { GradientBackground } from '../../src/components/GradientBackground';
 import { AmbientParticles } from '../../src/components/AmbientParticles';
 import { TimePickerSheet } from '../../src/components/TimePickerSheet';
@@ -40,6 +43,7 @@ export default function SettingsScreen() {
   const themeMode = useTheme((s) => s.mode);
   const toggleTheme = useTheme((s) => s.toggle);
   const tc = useTheme((s) => s.t);
+  const router = useRouter();
 
   // Which time picker is open
   const [picker, setPicker] = useState<null | 'streak' | 'start' | 'end'>(null);
@@ -116,6 +120,39 @@ export default function SettingsScreen() {
           >
             Customise your experience
           </Animated.Text>
+
+          {/* My Planners — quick jump to other planning tools */}
+          <SectionHeader title="MY PLANNERS" />
+          <Animated.View
+            entering={FadeInDown.delay(40).duration(500)}
+            style={[styles.group, { backgroundColor: tc.glass, borderColor: tc.glassBorder }]}
+          >
+            <PlannerRow
+              icon={<Wallet size={20} color="#fff" strokeWidth={2.2} />}
+              iconBg={['#FF8A80', '#E53935']}
+              label="Budget Planner"
+              sublabel="Track spending & savings"
+              onPress={() => {
+                haptic.light();
+                router.push('/budget');
+              }}
+              testID="setting-budget"
+              tc={tc}
+            />
+            <Divider tc={tc} />
+            <PlannerRow
+              icon={<ListChecks size={20} color="#fff" strokeWidth={2.2} />}
+              iconBg={['#FFB74D', '#FB8C00']}
+              label="Bucket List"
+              sublabel="Goals & dreams to chase"
+              onPress={() => {
+                haptic.light();
+                router.push('/bucket');
+              }}
+              testID="setting-bucket"
+              tc={tc}
+            />
+          </Animated.View>
 
           {/* Appearance */}
           <SectionHeader title="APPEARANCE" />
@@ -501,6 +538,55 @@ function Divider({ tc }: { tc: any }) {
   return <View style={[styles.divider, { backgroundColor: tc.mode === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)' }]} />;
 }
 
+function PlannerRow({
+  icon,
+  iconBg,
+  label,
+  sublabel,
+  onPress,
+  testID,
+  tc,
+}: {
+  icon: React.ReactNode;
+  iconBg: [string, string];
+  label: string;
+  sublabel: string;
+  onPress: () => void;
+  testID?: string;
+  tc: any;
+}) {
+  const scale = useSharedValue(1);
+  const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  return (
+    <Animated.View style={style}>
+      <Pressable
+        onPress={onPress}
+        onPressIn={() => (scale.value = withSpring(0.98, spring.snappy))}
+        onPressOut={() => (scale.value = withSpring(1, spring.bouncy))}
+        style={styles.row}
+        testID={testID}
+      >
+        <View style={styles.rowLeft}>
+          <View style={styles.plannerIconWrap}>
+            <LinearGradient
+              colors={iconBg}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={StyleSheet.absoluteFill}
+            />
+            {icon}
+          </View>
+          <View>
+            <Text style={[styles.rowLabel, { color: tc.text }]}>{label}</Text>
+            <Text style={[styles.rowSub, { color: tc.textDim }]}>{sublabel}</Text>
+          </View>
+        </View>
+        <ChevronRight size={18} color={tc.textFaint} />
+      </Pressable>
+    </Animated.View>
+  );
+}
+
 function DayTimeline({
   startPct,
   endPct,
@@ -621,6 +707,18 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  plannerIconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    overflow: 'hidden',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.25,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
   },
   rowLabel: {
     color: '#fff',
