@@ -20,10 +20,12 @@ export interface Task {
 
 export interface Category {
   id: string;
-  key: CategoryKey;
+  key: CategoryKey | string;
   name: string;
   icon: string;
   color: string;
+  emoji?: string;
+  custom?: boolean;
 }
 
 export interface User {

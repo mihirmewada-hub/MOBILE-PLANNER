@@ -7,12 +7,12 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Briefcase, Heart, BookOpen, Users, Palette, LucideIcon } from 'lucide-react-native';
+import { Briefcase, Heart, BookOpen, Users, Palette, Star, LucideIcon } from 'lucide-react-native';
 import { colors, spring } from '../theme/tokens';
 import { CategoryKey } from '../store/types';
 import { haptic } from '../hooks/useHaptics';
 
-const iconMap: Record<CategoryKey, LucideIcon> = {
+const iconMap: Record<string, LucideIcon> = {
   work: Briefcase,
   health: Heart,
   study: BookOpen,
@@ -21,18 +21,19 @@ const iconMap: Record<CategoryKey, LucideIcon> = {
 };
 
 interface Props {
-  keyId: CategoryKey;
+  keyId: string;
   label: string;
   color: string;
   active: boolean;
+  emoji?: string;
   onPress: () => void;
   testID?: string;
 }
 
-export function CategoryPill({ keyId, label, color, active, onPress, testID }: Props) {
+export function CategoryPill({ keyId, label, color, active, emoji, onPress, testID }: Props) {
   const scale = useSharedValue(1);
   const glow = useSharedValue(0);
-  const Icon = iconMap[keyId];
+  const Icon = iconMap[keyId] ?? Star;
 
   useEffect(() => {
     scale.value = withSpring(active ? 1.12 : 1, spring.bouncy);
@@ -64,11 +65,15 @@ export function CategoryPill({ keyId, label, color, active, onPress, testID }: P
           />
         </Animated.View>
         <View style={[styles.inner, active && styles.innerActive]}>
-          <Icon
-            size={22}
-            color={active ? '#fff' : 'rgba(255,255,255,0.7)'}
-            strokeWidth={active ? 2.4 : 2}
-          />
+          {emoji ? (
+            <Text style={styles.emoji}>{emoji}</Text>
+          ) : (
+            <Icon
+              size={22}
+              color={active ? '#fff' : 'rgba(255,255,255,0.7)'}
+              strokeWidth={active ? 2.4 : 2}
+            />
+          )}
           <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
         </View>
       </Pressable>
@@ -115,5 +120,9 @@ const styles = StyleSheet.create({
   labelActive: {
     color: '#fff',
     fontWeight: '700',
+  },
+  emoji: {
+    fontSize: 22,
+    lineHeight: 26,
   },
 });

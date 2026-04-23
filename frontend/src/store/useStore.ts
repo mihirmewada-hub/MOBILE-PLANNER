@@ -15,13 +15,14 @@ interface State {
   addTask: (task: Omit<Task, 'id' | 'completed' | 'completedAt' | 'createdAt' | 'updatedAt'>) => void;
   toggleTask: (id: string) => void;
   deleteTask: (id: string) => void;
+  addCategory: (cat: { name: string; emoji: string; color: string }) => void;
 }
 
-const persist = async (state: Pick<State, 'tasks' | 'user'>) => {
+const persist = async (state: Pick<State, 'tasks' | 'user' | 'categories'>) => {
   try {
     await AsyncStorage.setItem(
       STORAGE_KEY,
-      JSON.stringify({ tasks: state.tasks, user: state.user })
+      JSON.stringify({ tasks: state.tasks, user: state.user, categories: state.categories })
     );
   } catch {}
 };
@@ -40,6 +41,7 @@ export const useStore = create<State>((set, get) => ({
         set({
           tasks: parsed.tasks ?? demoTasks,
           user: parsed.user ?? demoUser,
+          categories: parsed.categories ?? demoCategories,
           hydrated: true,
         });
       } else {
@@ -62,7 +64,7 @@ export const useStore = create<State>((set, get) => ({
     };
     const next = [newTask, ...get().tasks];
     set({ tasks: next });
-    persist({ tasks: next, user: get().user });
+    persist({ tasks: next, user: get().user, categories: get().categories });
   },
 
   toggleTask: (id) => {
@@ -73,13 +75,29 @@ export const useStore = create<State>((set, get) => ({
         : t
     );
     set({ tasks: next });
-    persist({ tasks: next, user: get().user });
+    persist({ tasks: next, user: get().user, categories: get().categories });
   },
 
   deleteTask: (id) => {
     const next = get().tasks.filter((t) => t.id !== id);
     set({ tasks: next });
-    persist({ tasks: next, user: get().user });
+    persist({ tasks: next, user: get().user, categories: get().categories });
+  },
+
+  addCategory: ({ name, emoji, color }) => {
+    const id = `c_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+    const newCat: Category = {
+      id,
+      key: id,
+      name,
+      emoji,
+      icon: 'star',
+      color,
+      custom: true,
+    };
+    const next = [...get().categories, newCat];
+    set({ categories: next });
+    persist({ tasks: get().tasks, user: get().user, categories: next });
   },
 }));
 

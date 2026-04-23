@@ -24,6 +24,7 @@ import { CategoryPill } from '../../src/components/CategoryPill';
 import { TaskCard } from '../../src/components/TaskCard';
 import { Flame } from '../../src/components/Flame';
 import { AmbientParticles } from '../../src/components/AmbientParticles';
+import { AddCategorySheet } from '../../src/components/AddCategorySheet';
 import { useStore } from '../../src/store/useStore';
 import { colors, radius } from '../../src/theme/tokens';
 import { CategoryKey } from '../../src/store/types';
@@ -34,8 +35,10 @@ const HEADER_MAX = 160;
 
 export default function Dashboard() {
   const { tasks, categories, user } = useStore();
+  const addCategory = useStore((s) => s.addCategory);
   const { width } = useWindowDimensions();
-  const [activeCat, setActiveCat] = useState<CategoryKey | 'all'>('all');
+  const [activeCat, setActiveCat] = useState<string>('all');
+  const [showAddCat, setShowAddCat] = useState(false);
   const scrollY = useSharedValue(0);
 
   const today = new Date();
@@ -184,11 +187,22 @@ export default function Dashboard() {
                 keyId={c.key}
                 label={c.name}
                 color={c.color}
+                emoji={c.emoji}
                 active={activeCat === c.key}
                 onPress={() => setActiveCat(c.key)}
                 testID={`category-${c.key}`}
               />
             ))}
+            <Pressable
+              onPress={() => {
+                setShowAddCat(true);
+              }}
+              style={styles.addPill}
+              testID="category-add"
+            >
+              <Text style={styles.addPlus}>+</Text>
+              <Text style={styles.addLabel}>New</Text>
+            </Pressable>
           </ScrollView>
 
           {/* Tasks */}
@@ -219,6 +233,15 @@ export default function Dashboard() {
           <View style={{ height: 120 }} />
         </AnimatedScrollView>
       </SafeAreaView>
+
+      <AddCategorySheet
+        visible={showAddCat}
+        onClose={() => setShowAddCat(false)}
+        onCreate={({ name, emoji, color }) => {
+          addCategory({ name, emoji, color });
+          setShowAddCat(false);
+        }}
+      />
     </GradientBackground>
   );
 }
@@ -413,6 +436,30 @@ const styles = StyleSheet.create({
   },
   allPillTextActive: {
     color: '#fff',
+  },
+  addPill: {
+    height: 66,
+    width: 66,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(229,57,53,0.08)',
+    borderWidth: 1.2,
+    borderColor: 'rgba(229,57,53,0.4)',
+    borderStyle: 'dashed',
+    marginLeft: 4,
+  },
+  addPlus: {
+    color: colors.crimsonGlow,
+    fontSize: 24,
+    fontWeight: '900',
+    lineHeight: 26,
+  },
+  addLabel: {
+    color: colors.crimsonGlow,
+    fontSize: 11,
+    fontWeight: '700',
+    marginTop: 2,
   },
 
   taskList: {
