@@ -195,13 +195,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#000',
   },
   fabWrap: {
-    position: 'absolute',
-    bottom: 18,
-    left: 0,
-    right: 0,
-    width: '100%',
+    width: 60,
+    height: 60,
     alignItems: 'center',
     justifyContent: 'center',
+    position: 'relative',
+    marginTop: -22,
   },
   glow: {
     position: 'absolute',

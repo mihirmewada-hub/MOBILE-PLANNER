@@ -35,7 +35,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
           if (!def) return null;
           const focused = state.index === index;
 
-          return (
+          const tabNode = (
             <TabButton
               key={route.key}
               label={def.label}
@@ -46,19 +46,27 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
                 navigation.navigate(route.name);
               }}
               testID={`tab-${def.label.toLowerCase()}`}
-              // Add spacer index 2 is analytics; the middle-space is taken by FAB
-              isLeftOfCenter={index === 1}
-              isRightOfCenter={index === 2}
             />
           );
+
+          // Inject FAB slot between 2nd and 3rd visible tab
+          if (index === 1) {
+            return (
+              <React.Fragment key={route.key}>
+                {tabNode}
+                <View key="fab-slot" style={styles.fabSlot}>
+                  <FAB
+                    onSelectCategory={(c: CategoryKey) => {
+                      router.push(`/create?category=${c}`);
+                    }}
+                  />
+                </View>
+              </React.Fragment>
+            );
+          }
+          return tabNode;
         })}
       </View>
-
-      <FAB
-        onSelectCategory={(c: CategoryKey) => {
-          router.push(`/create?category=${c}`);
-        }}
-      />
     </View>
   );
 }
@@ -69,16 +77,12 @@ function TabButton({
   focused,
   onPress,
   testID,
-  isLeftOfCenter,
-  isRightOfCenter,
 }: {
   label: string;
   Icon: LucideIcon;
   focused: boolean;
   onPress: () => void;
   testID?: string;
-  isLeftOfCenter?: boolean;
-  isRightOfCenter?: boolean;
 }) {
   const v = useSharedValue(focused ? 1 : 0);
 
@@ -100,15 +104,7 @@ function TabButton({
   }));
 
   return (
-    <Pressable
-      onPress={onPress}
-      style={[
-        styles.tab,
-        isLeftOfCenter && { marginRight: 28 },
-        isRightOfCenter && { marginLeft: 28 },
-      ]}
-      testID={testID}
-    >
+    <Pressable onPress={onPress} style={styles.tab} testID={testID}>
       <Animated.View style={iconAnim}>
         <Icon size={22} color={focused ? colors.crimsonGlow : 'rgba(255,255,255,0.55)'} strokeWidth={2.2} />
       </Animated.View>
@@ -169,6 +165,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: 48,
+  },
+  fabSlot: {
+    width: 72,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   label: {
     color: colors.crimsonGlow,
