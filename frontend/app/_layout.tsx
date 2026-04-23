@@ -5,32 +5,37 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useStore } from '../src/store/useStore';
+import { useTheme } from '../src/theme/useTheme';
 import { colors } from '../src/theme/tokens';
 import { loadSkia } from '../src/utils/skia-loader';
 
 export default function RootLayout() {
   const hydrate = useStore((s) => s.hydrate);
+  const hydrateTheme = useTheme((s) => s.hydrate);
+  const mode = useTheme((s) => s.mode);
+  const t = useTheme((s) => s.t);
   const [skiaReady, setSkiaReady] = useState(Platform.OS !== 'web');
 
   useEffect(() => {
     hydrate();
+    hydrateTheme();
     if (Platform.OS === 'web') {
       loadSkia().finally(() => setSkiaReady(true));
     }
-  }, [hydrate]);
+  }, [hydrate, hydrateTheme]);
 
   if (!skiaReady) {
     return <View style={{ flex: 1, backgroundColor: colors.bgBase }} />;
   }
 
   return (
-    <GestureHandlerRootView style={{ flex: 1, backgroundColor: colors.bgBase }}>
+    <GestureHandlerRootView style={{ flex: 1, backgroundColor: t.bgBase }}>
       <SafeAreaProvider>
-        <StatusBar style="light" />
+        <StatusBar style={mode === 'light' ? 'dark' : 'light'} />
         <Stack
           screenOptions={{
             headerShown: false,
-            contentStyle: { backgroundColor: colors.bgBase },
+            contentStyle: { backgroundColor: t.bgBase },
             animation: 'fade',
           }}
         >

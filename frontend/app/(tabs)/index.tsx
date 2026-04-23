@@ -27,6 +27,7 @@ import { AmbientParticles } from '../../src/components/AmbientParticles';
 import { AddCategorySheet } from '../../src/components/AddCategorySheet';
 import { useStore } from '../../src/store/useStore';
 import { colors, radius } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/useTheme';
 import { CategoryKey } from '../../src/store/types';
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
@@ -36,6 +37,7 @@ const HEADER_MAX = 160;
 export default function Dashboard() {
   const { tasks, categories, user } = useStore();
   const addCategory = useStore((s) => s.addCategory);
+  const t = useTheme((s) => s.t);
   const { width } = useWindowDimensions();
   const [activeCat, setActiveCat] = useState<string>('all');
   const [showAddCat, setShowAddCat] = useState(false);
@@ -108,8 +110,8 @@ export default function Dashboard() {
               style={styles.headerTopRow}
             >
               <View style={{ flex: 1 }}>
-                <Text style={styles.greeting}>{greeting},</Text>
-                <Text style={styles.userName}>{user.name.split(' ')[0]}</Text>
+                <Text style={[styles.greeting, { color: t.textDim }]}>{greeting},</Text>
+                <Text style={[styles.userName, { color: t.text }]}>{user.name.split(' ')[0]}</Text>
               </View>
               <View style={styles.headerIcons}>
                 <View style={styles.streak}>
@@ -126,19 +128,19 @@ export default function Dashboard() {
             </Animated.View>
 
             <Animated.View entering={FadeInDown.delay(400).duration(600)} style={[styles.dateRow, dateParallax]}>
-              <Text style={styles.weekday}>{dayName},</Text>
-              <Text style={styles.bigDate}>{dateNum}</Text>
+              <Text style={[styles.weekday, { color: t.textDim }]}>{dayName},</Text>
+              <Text style={[styles.bigDate, { color: t.text }]}>{dateNum}</Text>
             </Animated.View>
           </Animated.View>
 
           {/* Progress Ring Card */}
-          <Animated.View entering={FadeInDown.delay(300).duration(600)} style={styles.ringCard}>
+          <Animated.View entering={FadeInDown.delay(300).duration(600)} style={[styles.ringCard, { backgroundColor: t.glass, borderColor: t.glassBorder }]}>
             <View style={styles.ringLeft}>
               <ProgressRing progress={progress} size={160} stroke={12} label="Today" />
             </View>
             <View style={styles.ringRight}>
-              <Text style={styles.ringTitle}>Daily goal</Text>
-              <Text style={styles.ringSubtitle}>
+              <Text style={[styles.ringTitle, { color: t.text }]}>Daily goal</Text>
+              <Text style={[styles.ringSubtitle, { color: t.textDim }]}>
                 {completedCount} of {tasks.length} tasks
               </Text>
               <View style={styles.chipsRow}>
@@ -158,7 +160,7 @@ export default function Dashboard() {
 
           {/* Categories */}
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionTitle}>Categories</Text>
+            <Text style={[styles.sectionTitle, { color: t.text }]}>Categories</Text>
           </View>
           <ScrollView
             horizontal
@@ -207,7 +209,7 @@ export default function Dashboard() {
 
           {/* Tasks */}
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionTitle}>Today&apos;s tasks</Text>
+            <Text style={[styles.sectionTitle, { color: t.text }]}>Today&apos;s tasks</Text>
             <Pressable>
               <Text style={styles.seeAll}>See all</Text>
             </Pressable>

@@ -11,6 +11,7 @@ import { Briefcase, Heart, BookOpen, Users, Palette, Star, LucideIcon } from 'lu
 import { colors, spring } from '../theme/tokens';
 import { CategoryKey } from '../store/types';
 import { haptic } from '../hooks/useHaptics';
+import { useTheme } from '../theme/useTheme';
 
 const iconMap: Record<string, LucideIcon> = {
   work: Briefcase,
@@ -34,6 +35,7 @@ export function CategoryPill({ keyId, label, color, active, emoji, onPress, test
   const scale = useSharedValue(1);
   const glow = useSharedValue(0);
   const Icon = iconMap[keyId] ?? Star;
+  const t = useTheme((s) => s.t);
 
   useEffect(() => {
     scale.value = withSpring(active ? 1.12 : 1, spring.bouncy);
@@ -53,6 +55,9 @@ export function CategoryPill({ keyId, label, color, active, emoji, onPress, test
     onPress();
   };
 
+  const iconColorInactive = t.mode === 'light' ? 'rgba(26,10,10,0.7)' : 'rgba(255,255,255,0.7)';
+  const labelColorInactive = t.mode === 'light' ? 'rgba(26,10,10,0.65)' : 'rgba(255,255,255,0.7)';
+
   return (
     <Animated.View style={[styles.wrap, animStyle]}>
       <Pressable onPress={handlePress} style={styles.press} testID={testID}>
@@ -64,17 +69,25 @@ export function CategoryPill({ keyId, label, color, active, emoji, onPress, test
             end={{ x: 1, y: 1 }}
           />
         </Animated.View>
-        <View style={[styles.inner, active && styles.innerActive]}>
+        <View style={[
+          styles.inner,
+          { backgroundColor: t.glass, borderColor: t.glassBorder },
+          active && styles.innerActive,
+        ]}>
           {emoji ? (
             <Text style={styles.emoji}>{emoji}</Text>
           ) : (
             <Icon
               size={22}
-              color={active ? '#fff' : 'rgba(255,255,255,0.7)'}
+              color={active ? '#fff' : iconColorInactive}
               strokeWidth={active ? 2.4 : 2}
             />
           )}
-          <Text style={[styles.label, active && styles.labelActive]}>{label}</Text>
+          <Text style={[
+            styles.label,
+            { color: labelColorInactive },
+            active && styles.labelActive,
+          ]}>{label}</Text>
         </View>
       </Pressable>
     </Animated.View>

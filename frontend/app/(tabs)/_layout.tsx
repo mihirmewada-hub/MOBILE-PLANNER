@@ -10,6 +10,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Home, Calendar, BarChart3, Settings, LucideIcon } from 'lucide-react-native';
 import { colors, spring } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/useTheme';
 import { FAB } from '../../src/components/FAB';
 import { haptic } from '../../src/hooks/useHaptics';
 import { CategoryKey } from '../../src/store/types';
@@ -23,15 +24,16 @@ const tabsDef: { name: string; label: string; icon: LucideIcon }[] = [
 
 function CustomTabBar({ state, descriptors, navigation }: any) {
   const router = useRouter();
+  const t = useTheme((s) => s.t);
 
   return (
-    <View style={styles.wrap}>
+    <View style={[styles.wrap, { backgroundColor: t.tabBg, borderTopColor: t.tabBorder }]}>
       {/* top glow line */}
       <View style={styles.topGlow} pointerEvents="none" />
       <View style={styles.bar}>
         {state.routes.map((route: any, index: number) => {
           if (route.name === 'create') return null;
-          const def = tabsDef.find((t) => t.name === route.name);
+          const def = tabsDef.find((tb) => tb.name === route.name);
           if (!def) return null;
           const focused = state.index === index;
 
@@ -41,6 +43,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
               label={def.label}
               Icon={def.icon}
               focused={focused}
+              inactiveColor={t.textDim}
               onPress={() => {
                 haptic.light();
                 navigation.navigate(route.name);
@@ -77,12 +80,14 @@ function TabButton({
   focused,
   onPress,
   testID,
+  inactiveColor,
 }: {
   label: string;
   Icon: LucideIcon;
   focused: boolean;
   onPress: () => void;
   testID?: string;
+  inactiveColor?: string;
 }) {
   const v = useSharedValue(focused ? 1 : 0);
 
@@ -106,7 +111,7 @@ function TabButton({
   return (
     <Pressable onPress={onPress} style={styles.tab} testID={testID}>
       <Animated.View style={iconAnim}>
-        <Icon size={22} color={focused ? colors.crimsonGlow : 'rgba(255,255,255,0.55)'} strokeWidth={2.2} />
+        <Icon size={22} color={focused ? colors.crimsonGlow : (inactiveColor || 'rgba(255,255,255,0.55)')} strokeWidth={2.2} />
       </Animated.View>
       <Animated.Text style={[styles.label, labelStyle]}>{label}</Animated.Text>
       <Animated.View style={[styles.dot, dotStyle]} />
@@ -115,12 +120,13 @@ function TabButton({
 }
 
 export default function TabsLayout() {
+  const bg = useTheme((s) => s.t.bgBase);
   return (
     <Tabs
       tabBar={(props) => <CustomTabBar {...props} />}
       screenOptions={{
         headerShown: false,
-        sceneStyle: { backgroundColor: colors.bgBase },
+        sceneStyle: { backgroundColor: bg },
       }}
     >
       <Tabs.Screen name="index" />

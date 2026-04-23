@@ -9,6 +9,7 @@ import Animated, {
   runOnJS,
 } from 'react-native-reanimated';
 import { colors, radius } from '../theme/tokens';
+import { useTheme } from '../theme/useTheme';
 
 interface Props {
   label: string;
@@ -21,6 +22,7 @@ interface Props {
 export function StatCard({ label, value, unit, accent = colors.crimson, testID }: Props) {
   const anim = useSharedValue(0);
   const [display, setDisplay] = useState(0);
+  const t = useTheme((s) => s.t);
 
   useEffect(() => {
     anim.value = 0;
@@ -36,13 +38,13 @@ export function StatCard({ label, value, unit, accent = colors.crimson, testID }
   }));
 
   return (
-    <View style={styles.card} testID={testID}>
+    <View style={[styles.card, { backgroundColor: t.glass, borderColor: t.glassBorder }]} testID={testID}>
       <Animated.View style={[styles.accent, { backgroundColor: accent }, accentStyle]} />
       <View style={styles.row}>
-        <Text style={styles.value}>{display}</Text>
-        {unit ? <Text style={styles.unit}>{unit}</Text> : null}
+        <Text style={[styles.value, { color: t.text }]}>{display}</Text>
+        {unit ? <Text style={[styles.unit, { color: t.textDim }]}>{unit}</Text> : null}
       </View>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, { color: t.textDim }]}>{label}</Text>
     </View>
   );
 }

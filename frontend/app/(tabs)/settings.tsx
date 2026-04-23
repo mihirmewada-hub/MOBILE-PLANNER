@@ -20,11 +20,13 @@ import {
   Download,
   Trash2,
   ChevronRight,
+  Sunrise,
 } from 'lucide-react-native';
 import { GradientBackground } from '../../src/components/GradientBackground';
 import { AmbientParticles } from '../../src/components/AmbientParticles';
 import { TimePickerSheet } from '../../src/components/TimePickerSheet';
 import { colors, radius, spring } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/useTheme';
 import { haptic } from '../../src/hooks/useHaptics';
 
 const REMINDER_OPTIONS = [0, 15, 30, 60];
@@ -35,6 +37,9 @@ export default function SettingsScreen() {
   const [dayStart, setDayStart] = useState<string>('3:00 PM');
   const [dayEnd, setDayEnd] = useState<string>('6:00 AM');
   const [cloudBackup, setCloudBackup] = useState<boolean>(true);
+  const themeMode = useTheme((s) => s.mode);
+  const toggleTheme = useTheme((s) => s.toggle);
+  const tc = useTheme((s) => s.t);
 
   // Which time picker is open
   const [picker, setPicker] = useState<null | 'streak' | 'start' | 'end'>(null);
@@ -102,20 +107,63 @@ export default function SettingsScreen() {
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
         >
-          <Animated.Text entering={FadeIn.duration(400)} style={styles.title}>
+          <Animated.Text entering={FadeIn.duration(400)} style={[styles.title, { color: tc.text }]}>
             Settings
           </Animated.Text>
           <Animated.Text
             entering={FadeIn.duration(400).delay(80)}
-            style={styles.subtitle}
+            style={[styles.subtitle, { color: tc.textDim }]}
           >
             Customise your experience
           </Animated.Text>
 
+          {/* Appearance */}
+          <SectionHeader title="APPEARANCE" />
+          <Animated.View
+            entering={FadeInDown.delay(80).duration(500)}
+            style={styles.group}
+          >
+            <Pressable onPress={() => { haptic.light(); toggleTheme(); }} style={styles.row} testID="setting-theme">
+              <View style={styles.rowLeft}>
+                <View style={styles.iconCircle}>
+                  {themeMode === 'light' ? (
+                    <Sunrise size={18} color="#FFB74D" strokeWidth={2} />
+                  ) : (
+                    <Moon size={18} color="#64B5F6" strokeWidth={2} />
+                  )}
+                </View>
+                <View>
+                  <Text style={[styles.rowLabel, { color: tc.text }]}>Theme</Text>
+                  <Text style={[styles.rowSub, { color: tc.textDim }]}>
+                    {themeMode === 'light' ? 'Light — vibrant & airy' : 'Dark — crimson noir'}
+                  </Text>
+                </View>
+              </View>
+              <View style={styles.themePill}>
+                <View
+                  style={[
+                    styles.themeOption,
+                    themeMode === 'dark' && styles.themeOptionActive,
+                  ]}
+                >
+                  <Moon size={14} color={themeMode === 'dark' ? '#fff' : 'rgba(255,255,255,0.5)'} />
+                </View>
+                <View
+                  style={[
+                    styles.themeOption,
+                    themeMode === 'light' && styles.themeOptionActiveLight,
+                  ]}
+                >
+                  <Sun size={14} color={themeMode === 'light' ? '#1A0A0A' : 'rgba(255,255,255,0.5)'} />
+                </View>
+              </View>
+            </Pressable>
+          </Animated.View>
+
           {/* Planner group */}
           <Animated.View
             entering={FadeInDown.delay(150).duration(500)}
-            style={styles.group}
+            style={[styles.group, { backgroundColor: tc.glass, borderColor: tc.glassBorder }]}
           >
             <Row
               icon={<Clock size={18} color={colors.crimsonGlow} strokeWidth={2} />}
@@ -123,8 +171,9 @@ export default function SettingsScreen() {
               value={defaultReminder === 0 ? 'Off' : `${defaultReminder} min`}
               onPress={cycleReminder}
               testID="setting-reminder"
+              tc={tc}
             />
-            <Divider />
+            <Divider tc={tc} />
             <Row
               icon={<RefreshCw size={18} color={colors.crimsonGlow} strokeWidth={2} />}
               label="Streak Reset Time"
@@ -134,6 +183,7 @@ export default function SettingsScreen() {
                 setPicker('streak');
               }}
               testID="setting-streak-reset"
+              tc={tc}
             />
           </Animated.View>
 
@@ -141,7 +191,7 @@ export default function SettingsScreen() {
 
           <Animated.View
             entering={FadeInDown.delay(300).duration(500)}
-            style={styles.group}
+            style={[styles.group, { backgroundColor: tc.glass, borderColor: tc.glassBorder }]}
           >
             <TimeRow
               icon={<Sun size={18} color="#FFB74D" strokeWidth={2} />}
@@ -153,8 +203,9 @@ export default function SettingsScreen() {
                 setPicker('start');
               }}
               testID="setting-day-starts"
+              tc={tc}
             />
-            <Divider />
+            <Divider tc={tc} />
             <TimeRow
               icon={<Moon size={18} color="#64B5F6" strokeWidth={2} />}
               label="Day Ends"
@@ -165,12 +216,14 @@ export default function SettingsScreen() {
                 setPicker('end');
               }}
               testID="setting-day-ends"
+              tc={tc}
             />
 
             <DayTimeline
               startPct={startPct}
               endPct={endPct}
               activeLabel={`${activeHours}h active · ${sleepHours}h sleep`}
+              tc={tc}
             />
           </Animated.View>
 
@@ -178,7 +231,7 @@ export default function SettingsScreen() {
 
           <Animated.View
             entering={FadeInDown.delay(450).duration(500)}
-            style={styles.group}
+            style={[styles.group, { backgroundColor: tc.glass, borderColor: tc.glassBorder }]}
           >
             <ToggleRow
               icon={<Cloud size={18} color={colors.crimsonGlow} strokeWidth={2} />}
@@ -189,27 +242,30 @@ export default function SettingsScreen() {
                 setCloudBackup(v);
               }}
               testID="setting-cloud-backup"
+              tc={tc}
             />
-            <Divider />
+            <Divider tc={tc} />
             <NavRow
               icon={<Download size={18} color={colors.crimsonGlow} strokeWidth={2} />}
               label="Export Data"
               onPress={onExport}
               testID="setting-export"
+              tc={tc}
             />
-            <Divider />
+            <Divider tc={tc} />
             <NavRow
               icon={<Trash2 size={18} color={colors.crimson} strokeWidth={2} />}
               label="Clear All Data"
               danger
               onPress={onClear}
               testID="setting-clear"
+              tc={tc}
             />
           </Animated.View>
 
           <View style={styles.footer}>
-            <Text style={styles.footerTitle}>Day Planner v1.0 — Red Edition</Text>
-            <Text style={styles.footerSub}>Made with ❤️</Text>
+            <Text style={[styles.footerTitle, { color: tc.textDim }]}>Day Planner v1.0 — Red Edition</Text>
+            <Text style={[styles.footerSub, { color: tc.textFaint }]}>Made with ❤️</Text>
           </View>
 
           <View style={{ height: 120 }} />
@@ -268,12 +324,14 @@ function Row({
   value,
   onPress,
   testID,
+  tc,
 }: {
   icon: React.ReactNode;
   label: string;
   value: string;
   onPress: () => void;
   testID?: string;
+  tc: any;
 }) {
   const scale = useSharedValue(1);
   const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -288,12 +346,12 @@ function Row({
         testID={testID}
       >
         <View style={styles.rowLeft}>
-          <View style={styles.iconCircle}>{icon}</View>
-          <Text style={styles.rowLabel}>{label}</Text>
+          <View style={[styles.iconCircle, { backgroundColor: tc.glassStrong, borderColor: tc.glassBorder }]}>{icon}</View>
+          <Text style={[styles.rowLabel, { color: tc.text }]}>{label}</Text>
         </View>
         <View style={styles.rowRight}>
           <Text style={styles.rowValue}>{value}</Text>
-          <ChevronRight size={16} color={colors.textFaint} style={{ marginLeft: 4 }} />
+          <ChevronRight size={16} color={tc.textFaint} style={{ marginLeft: 4 }} />
         </View>
       </Pressable>
     </Animated.View>
@@ -307,6 +365,7 @@ function TimeRow({
   value,
   onPress,
   testID,
+  tc,
 }: {
   icon: React.ReactNode;
   label: string;
@@ -314,6 +373,7 @@ function TimeRow({
   value: string;
   onPress: () => void;
   testID?: string;
+  tc: any;
 }) {
   const scale = useSharedValue(1);
   const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -327,10 +387,10 @@ function TimeRow({
         testID={testID}
       >
         <View style={styles.rowLeft}>
-          <View style={styles.iconCircle}>{icon}</View>
+          <View style={[styles.iconCircle, { backgroundColor: tc.glassStrong, borderColor: tc.glassBorder }]}>{icon}</View>
           <View>
-            <Text style={styles.rowLabel}>{label}</Text>
-            <Text style={styles.rowSub}>{sublabel}</Text>
+            <Text style={[styles.rowLabel, { color: tc.text }]}>{label}</Text>
+            <Text style={[styles.rowSub, { color: tc.textDim }]}>{sublabel}</Text>
           </View>
         </View>
         <View style={styles.valuePill}>
@@ -347,12 +407,14 @@ function ToggleRow({
   value,
   onChange,
   testID,
+  tc,
 }: {
   icon: React.ReactNode;
   label: string;
   value: boolean;
   onChange: (v: boolean) => void;
   testID?: string;
+  tc: any;
 }) {
   const anim = useSharedValue(value ? 1 : 0);
   React.useEffect(() => {
@@ -373,10 +435,10 @@ function ToggleRow({
       testID={testID}
     >
       <View style={styles.rowLeft}>
-        <View style={styles.iconCircle}>{icon}</View>
-        <Text style={styles.rowLabel}>{label}</Text>
+        <View style={[styles.iconCircle, { backgroundColor: tc.glassStrong, borderColor: tc.glassBorder }]}>{icon}</View>
+        <Text style={[styles.rowLabel, { color: tc.text }]}>{label}</Text>
       </View>
-      <View style={styles.track}>
+      <View style={[styles.track, { backgroundColor: tc.mode === 'light' ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)', borderColor: tc.mode === 'light' ? 'rgba(0,0,0,0.12)' : 'rgba(255,255,255,0.12)' }]}>
         <Animated.View style={[StyleSheet.absoluteFill, styles.trackOn, trackOnStyle]}>
           <LinearGradient
             colors={[colors.crimsonGlow, colors.crimson]}
@@ -397,12 +459,14 @@ function NavRow({
   onPress,
   danger,
   testID,
+  tc,
 }: {
   icon: React.ReactNode;
   label: string;
   onPress: () => void;
   danger?: boolean;
   testID?: string;
+  tc: any;
 }) {
   const scale = useSharedValue(1);
   const style = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
@@ -419,31 +483,34 @@ function NavRow({
           <View
             style={[
               styles.iconCircle,
-              danger && { backgroundColor: 'rgba(229,57,53,0.12)' },
+              { backgroundColor: tc.glassStrong, borderColor: tc.glassBorder },
+              danger && { backgroundColor: 'rgba(229,57,53,0.12)', borderColor: 'rgba(229,57,53,0.3)' },
             ]}
           >
             {icon}
           </View>
-          <Text style={[styles.rowLabel, danger && styles.rowLabelDanger]}>{label}</Text>
+          <Text style={[styles.rowLabel, { color: tc.text }, danger && styles.rowLabelDanger]}>{label}</Text>
         </View>
-        <ChevronRight size={18} color={danger ? colors.crimson : colors.textFaint} />
+        <ChevronRight size={18} color={danger ? colors.crimson : tc.textFaint} />
       </Pressable>
     </Animated.View>
   );
 }
 
-function Divider() {
-  return <View style={styles.divider} />;
+function Divider({ tc }: { tc: any }) {
+  return <View style={[styles.divider, { backgroundColor: tc.mode === 'light' ? 'rgba(0,0,0,0.06)' : 'rgba(255,255,255,0.05)' }]} />;
 }
 
 function DayTimeline({
   startPct,
   endPct,
   activeLabel,
+  tc,
 }: {
   startPct: number;
   endPct: number;
   activeLabel: string;
+  tc: any;
 }) {
   // barWidth filled with gradient from start to end. Handle wrap.
   const wraps = endPct <= startPct;
@@ -451,11 +518,11 @@ function DayTimeline({
   return (
     <View style={styles.timeline}>
       <View style={styles.timelineLabelRow}>
-        <Text style={styles.timelineSide}>In Sleep</Text>
-        <Text style={styles.timelineMain}>{activeLabel}</Text>
-        <Text style={styles.timelineSide}>In Sleep</Text>
+        <Text style={[styles.timelineSide, { color: tc.textFaint }]}>In Sleep</Text>
+        <Text style={[styles.timelineMain, { color: tc.text }]}>{activeLabel}</Text>
+        <Text style={[styles.timelineSide, { color: tc.textFaint }]}>In Sleep</Text>
       </View>
-      <View style={styles.timelineBar}>
+      <View style={[styles.timelineBar, { backgroundColor: tc.mode === 'light' ? 'rgba(229,57,53,0.1)' : 'rgba(255,255,255,0.06)' }]}>
         {wraps ? (
           <>
             <LinearGradient
@@ -482,7 +549,7 @@ function DayTimeline({
       </View>
       <View style={styles.timelineAxis}>
         {['12 AM', '6 AM', '12 PM', '6 PM', '12 AM'].map((t) => (
-          <Text key={t} style={styles.axisLabel}>
+          <Text key={t} style={[styles.axisLabel, { color: tc.textFaint }]}>
             {t}
           </Text>
         ))}
@@ -674,5 +741,34 @@ const styles = StyleSheet.create({
     color: colors.textFaint,
     fontSize: 11,
     marginTop: 4,
+  },
+  themePill: {
+    flexDirection: 'row',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    borderRadius: 999,
+    padding: 3,
+    borderWidth: 1,
+    borderColor: 'rgba(229,57,53,0.25)',
+  },
+  themeOption: {
+    width: 36,
+    height: 28,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  themeOptionActive: {
+    backgroundColor: colors.crimson,
+    shadowColor: colors.crimson,
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+  },
+  themeOptionActiveLight: {
+    backgroundColor: '#FFD54F',
+    shadowColor: '#FFB74D',
+    shadowOpacity: 0.6,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 2 },
   },
 });

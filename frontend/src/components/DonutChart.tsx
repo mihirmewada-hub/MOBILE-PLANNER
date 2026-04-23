@@ -18,6 +18,7 @@ import Animated, {
 import { colors } from '../theme/tokens';
 import { haptic } from '../hooks/useHaptics';
 import { isSkiaSupported } from '../utils/skiaSupport';
+import { useTheme } from '../theme/useTheme';
 
 export interface DonutSegment {
   key: string;
@@ -33,6 +34,7 @@ interface Props {
 }
 
 export function DonutChart({ size = 240, stroke = 26, segments }: Props) {
+  const themeColors = useTheme((s) => s.t);
   if (!isSkiaSupported) return <DonutFallback size={size} segments={segments} />;
   const r = (size - stroke) / 2;
   const cx = size / 2;
@@ -106,10 +108,10 @@ export function DonutChart({ size = 240, stroke = 26, segments }: Props) {
       </Canvas>
 
       <View style={[StyleSheet.absoluteFillObject, styles.center]} pointerEvents="box-none">
-        <Text style={styles.totalValue}>
+        <Text style={[styles.totalValue, { color: themeColors.text }]}>
           {displaySeg ? `${displaySeg.value.toFixed(1)}h` : `${total.toFixed(1)}h`}
         </Text>
-        <Text style={styles.totalLabel}>
+        <Text style={[styles.totalLabel, { color: themeColors.textDim }]}>
           {displaySeg ? displaySeg.label : 'Total today'}
         </Text>
       </View>
@@ -248,6 +250,7 @@ function DonutFallback({ size, segments }: { size: number; segments: DonutSegmen
   const r = (size - 26) / 2;
   const c = 2 * Math.PI * r;
   let offset = 0;
+  const themeColors = useTheme((s) => s.t);
   return (
     <View style={[{ width: size, height: size }, styles.fbWrap]}>
       <Svg width={size} height={size}>
@@ -273,8 +276,8 @@ function DonutFallback({ size, segments }: { size: number; segments: DonutSegmen
         })}
       </Svg>
       <View style={[StyleSheet.absoluteFillObject, styles.center]} pointerEvents="none">
-        <Text style={styles.totalValue}>{total.toFixed(1)}h</Text>
-        <Text style={styles.totalLabel}>Total today</Text>
+        <Text style={[styles.totalValue, { color: themeColors.text }]}>{total.toFixed(1)}h</Text>
+        <Text style={[styles.totalLabel, { color: themeColors.textDim }]}>Total today</Text>
       </View>
     </View>
   );

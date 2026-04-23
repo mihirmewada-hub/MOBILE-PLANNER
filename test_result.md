@@ -100,4 +100,53 @@
 
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
+
+user_problem_statement: |
+  React Native Expo habit tracker with "Crimson Noir" dark theme + recently requested
+  colorful LIGHT MODE support. Previous agent's bulk theme refactor left settings.tsx with
+  a syntax error and broke the app. Need to: (1) stabilize the codebase, (2) complete light
+  mode across all screens with a vibrant pastel background + bright crimson accents
+  matching the existing UI layout (no layout changes).
+
+frontend:
+  - task: "Fix settings.tsx syntax error & restore app"
+    implemented: true
+    working: true
+    file: "app/(tabs)/settings.tsx"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Repaired mangled StyleSheet block from previous agent. Expo now bundles; Metro serves."
+  - task: "Light mode theme wiring across screens"
+    implemented: true
+    working: true
+    file: "src/theme/useTheme.ts, app/(tabs)/*, src/components/*"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "main"
+        comment: "Threaded theme through Settings, Home, Analytics, Calendar, StatCard, CategoryPill, DonutChart (+fallback), TabBar. Light mode shows vibrant peach pastel bg with crimson accents; dark mode unchanged."
+
+metadata:
+  created_by: "main_agent"
+  version: "1.1"
+  test_sequence: 0
+  run_ui: false
+
+test_plan:
+  current_focus:
+    - "Light mode theme wiring across screens"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Crash fix + light mode rollout complete via manual screenshot verification in both dark & light. Awaiting user confirmation before optionally running testing_agent_v3_expo or moving to EAS build."
+
 #====================================================================================================

@@ -28,6 +28,7 @@ import { colors, categoryColors, spring, radius } from '../theme/tokens';
 import { Task, CategoryKey } from '../store/types';
 import { haptic } from '../hooks/useHaptics';
 import { isSkiaSupported } from '../utils/skiaSupport';
+import { useTheme } from '../theme/useTheme';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -71,6 +72,7 @@ function Particle({
 }
 
 function TaskCardImpl({ task, index, onToggle, onDelete }: Props) {
+  const theme = useTheme((s) => s.t);
   const translateX = useSharedValue(0);
   const checkScale = useSharedValue(task.completed ? 1 : 0);
   const burst = useSharedValue(0);
@@ -172,7 +174,7 @@ function TaskCardImpl({ task, index, onToggle, onDelete }: Props) {
       </View>
 
       <GestureDetector gesture={pan}>
-        <Animated.View style={[styles.card, animatedStyle]} testID={`task-card-${task.id}`}>
+        <Animated.View style={[styles.card, { backgroundColor: theme.cardBg, borderColor: theme.glassBorder }, animatedStyle]} testID={`task-card-${task.id}`}>
           <Animated.View
             pointerEvents="none"
             style={[StyleSheet.absoluteFillObject, styles.flashBg, flashStyle]}
@@ -213,7 +215,11 @@ function TaskCardImpl({ task, index, onToggle, onDelete }: Props) {
           <View style={styles.body}>
             <View style={styles.titleRow}>
               <Text
-                style={[styles.title, task.completed && styles.titleDim]}
+                style={[
+                  styles.title,
+                  { color: theme.text },
+                  task.completed && [styles.titleDim, { color: theme.textDim }],
+                ]}
                 numberOfLines={1}
               >
                 {task.title}
@@ -224,7 +230,7 @@ function TaskCardImpl({ task, index, onToggle, onDelete }: Props) {
               />
             </View>
             <View style={styles.metaRow}>
-              <Text style={styles.time}>
+              <Text style={[styles.time, { color: theme.textDim }]}>
                 {time(task.startTime)} — {time(task.endTime)}
               </Text>
               <View style={[styles.priorityDot, { backgroundColor: priorityColor }]} />

@@ -13,6 +13,7 @@ import { ProgressRing } from '../../src/components/ProgressRing';
 import { useStore } from '../../src/store/useStore';
 import { weeklyProductivity } from '../../src/store/demoData';
 import { colors, radius, categoryColors } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/useTheme';
 
 type Range = 'week' | 'month' | 'year';
 
@@ -21,6 +22,7 @@ export default function Analytics() {
   const { tasks } = useStore();
   const { width } = useWindowDimensions();
   const chartW = width - 40;
+  const t = useTheme((s) => s.t);
 
   const stats = useMemo(() => {
     const completed = tasks.filter((t) => t.completed).length;
@@ -71,7 +73,7 @@ export default function Analytics() {
           contentContainerStyle={styles.scroll}
           showsVerticalScrollIndicator={false}
         >
-          <Animated.Text entering={FadeIn.duration(500)} style={styles.title}>
+          <Animated.Text entering={FadeIn.duration(500)} style={[styles.title, { color: t.text }]}>
             Analytics
           </Animated.Text>
 
@@ -111,18 +113,18 @@ export default function Analytics() {
           {/* Donut Chart */}
           <Animated.View
             entering={FadeInDown.delay(300).duration(500)}
-            style={styles.card}
+            style={[styles.card, { backgroundColor: t.glass, borderColor: t.glassBorder }]}
           >
-            <Text style={styles.cardTitle}>Day breakdown</Text>
-            <Text style={styles.cardSub}>Tap a segment for details</Text>
+            <Text style={[styles.cardTitle, { color: t.text }]}>Day breakdown</Text>
+            <Text style={[styles.cardSub, { color: t.textDim }]}>Tap a segment for details</Text>
             <View style={styles.donutCenter}>
               <DonutChart size={Math.min(280, chartW - 20)} stroke={28} segments={donutSegments} />
             </View>
             <View style={styles.legend}>
               {donutSegments.map((s) => (
-                <View key={s.key} style={styles.legendItem}>
+                <View key={s.key} style={[styles.legendItem, { backgroundColor: t.mode === 'light' ? 'rgba(0,0,0,0.04)' : 'rgba(255,255,255,0.04)' }]}>
                   <View style={[styles.legendDot, { backgroundColor: s.color }]} />
-                  <Text style={styles.legendText}>
+                  <Text style={[styles.legendText, { color: t.text }]}>
                     {s.label} · {s.value}h
                   </Text>
                 </View>
@@ -133,10 +135,10 @@ export default function Analytics() {
           {/* Bar Chart */}
           <Animated.View
             entering={FadeInDown.delay(400).duration(500)}
-            style={styles.card}
+            style={[styles.card, { backgroundColor: t.glass, borderColor: t.glassBorder }]}
           >
-            <Text style={styles.cardTitle}>Time per category</Text>
-            <Text style={styles.cardSub}>Today</Text>
+            <Text style={[styles.cardTitle, { color: t.text }]}>Time per category</Text>
+            <Text style={[styles.cardSub, { color: t.textDim }]}>Today</Text>
             <View style={{ alignItems: 'center', marginTop: 14 }}>
               <BarChart width={chartW - 28} height={200} bars={bars} />
             </View>
@@ -145,10 +147,10 @@ export default function Analytics() {
           {/* Line Chart */}
           <Animated.View
             entering={FadeInDown.delay(500).duration(500)}
-            style={styles.card}
+            style={[styles.card, { backgroundColor: t.glass, borderColor: t.glassBorder }]}
           >
-            <Text style={styles.cardTitle}>Weekly productivity</Text>
-            <Text style={styles.cardSub}>7-day trend</Text>
+            <Text style={[styles.cardTitle, { color: t.text }]}>Weekly productivity</Text>
+            <Text style={[styles.cardSub, { color: t.textDim }]}>7-day trend</Text>
             <View style={{ alignItems: 'center', marginTop: 14 }}>
               <LineChart width={chartW - 28} height={180} data={weeklyProductivity} labels={labels} />
             </View>
@@ -157,12 +159,12 @@ export default function Analytics() {
           {/* Productivity Score */}
           <Animated.View
             entering={FadeInDown.delay(600).duration(500)}
-            style={[styles.card, styles.scoreCard]}
+            style={[styles.card, styles.scoreCard, { backgroundColor: t.glass, borderColor: t.glassBorder }]}
           >
             <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>Productivity score</Text>
-              <Text style={styles.cardSub}>This week</Text>
-              <Text style={styles.scoreBig}>{productivityScore}%</Text>
+              <Text style={[styles.cardTitle, { color: t.text }]}>Productivity score</Text>
+              <Text style={[styles.cardSub, { color: t.textDim }]}>This week</Text>
+              <Text style={[styles.scoreBig, { color: t.text }]}>{productivityScore}%</Text>
               <Text style={styles.scoreCap}>
                 {productivityScore >= 80
                   ? 'Outstanding ⚡'

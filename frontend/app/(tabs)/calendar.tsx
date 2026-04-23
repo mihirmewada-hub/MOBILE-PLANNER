@@ -5,18 +5,20 @@ import { Calendar } from 'lucide-react-native';
 import { GradientBackground } from '../../src/components/GradientBackground';
 import { AmbientParticles } from '../../src/components/AmbientParticles';
 import { colors } from '../../src/theme/tokens';
+import { useTheme } from '../../src/theme/useTheme';
 
 export default function CalendarScreen() {
+  const t = useTheme((s) => s.t);
   return (
     <GradientBackground>
       <AmbientParticles count={5} />
       <SafeAreaView style={styles.wrap}>
         <View style={styles.center}>
-          <View style={styles.iconWrap}>
+          <View style={[styles.iconWrap, { backgroundColor: t.mode === 'light' ? 'rgba(229,57,53,0.1)' : 'rgba(229,57,53,0.12)' }]}>
             <Calendar size={40} color={colors.crimsonGlow} strokeWidth={1.8} />
           </View>
-          <Text style={styles.title}>Calendar</Text>
-          <Text style={styles.sub}>Month & week views coming next</Text>
+          <Text style={[styles.title, { color: t.text }]}>Calendar</Text>
+          <Text style={[styles.sub, { color: t.textDim }]}>Month & week views coming next</Text>
         </View>
       </SafeAreaView>
     </GradientBackground>
