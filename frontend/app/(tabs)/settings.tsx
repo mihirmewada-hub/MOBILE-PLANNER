@@ -23,6 +23,7 @@ import {
 } from 'lucide-react-native';
 import { GradientBackground } from '../../src/components/GradientBackground';
 import { AmbientParticles } from '../../src/components/AmbientParticles';
+import { TimePickerSheet } from '../../src/components/TimePickerSheet';
 import { colors, radius, spring } from '../../src/theme/tokens';
 import { haptic } from '../../src/hooks/useHaptics';
 
@@ -30,16 +31,17 @@ const REMINDER_OPTIONS = [0, 15, 30, 60];
 
 export default function SettingsScreen() {
   const [defaultReminder, setDefaultReminder] = useState<number>(15);
-  const [streakReset, setStreakReset] = useState<string>('Midnight');
+  const [streakReset, setStreakReset] = useState<string>('12:00 AM');
   const [dayStart, setDayStart] = useState<string>('3:00 PM');
   const [dayEnd, setDayEnd] = useState<string>('6:00 AM');
   const [cloudBackup, setCloudBackup] = useState<boolean>(true);
 
+  // Which time picker is open
+  const [picker, setPicker] = useState<null | 'streak' | 'start' | 'end'>(null);
+
   // day start percent of 24h (3 PM = 15:00 => 62.5%)
   const startPct = timeToPct(dayStart);
   const endPct = timeToPct(dayEnd);
-  // Active window goes from startPct to endPct wrapping over midnight if end < start
-  // In the reference, day starts 3PM, day ends 6AM next day. So active = 15:00 -> 06:00 next = 15h? Actually 3PM->6AM = 15hours. Reference shows "17h active - 7h sleep" so our label is dynamic.
   const { activeHours, sleepHours } = computeWindow(dayStart, dayEnd);
 
   const cycleReminder = () => {
@@ -47,27 +49,6 @@ export default function SettingsScreen() {
     const idx = REMINDER_OPTIONS.indexOf(defaultReminder);
     const next = REMINDER_OPTIONS[(idx + 1) % REMINDER_OPTIONS.length];
     setDefaultReminder(next);
-  };
-
-  const cycleStreak = () => {
-    haptic.selection();
-    const opts = ['Midnight', '3:00 AM', '6:00 AM'];
-    const idx = opts.indexOf(streakReset);
-    setStreakReset(opts[(idx + 1) % opts.length]);
-  };
-
-  const cycleDayStart = () => {
-    haptic.selection();
-    const opts = ['12:00 PM', '3:00 PM', '6:00 PM', '9:00 AM'];
-    const idx = opts.indexOf(dayStart);
-    setDayStart(opts[(idx + 1) % opts.length]);
-  };
-
-  const cycleDayEnd = () => {
-    haptic.selection();
-    const opts = ['6:00 AM', '7:00 AM', '8:00 AM', '5:00 AM'];
-    const idx = opts.indexOf(dayEnd);
-    setDayEnd(opts[(idx + 1) % opts.length]);
   };
 
   const onExport = () => {
@@ -92,6 +73,26 @@ export default function SettingsScreen() {
       { text: 'Clear', style: 'destructive', onPress: () => haptic.success() },
     ]);
   };
+
+  const pickerTitle =
+    picker === 'start'
+      ? 'Start time'
+      : picker === 'end'
+      ? 'End time'
+      : 'Streak reset';
+
+  const pickerValue =
+    picker === 'start' ? dayStart : picker === 'end' ? dayEnd : streakReset;
+
+  const onPickerConfirm = (value: string) => {
+    if (picker === 'start') setDayStart(value);
+    else if (picker === 'end') setDayEnd(value);
+    else if (picker === 'streak') setStreakReset(value);
+    setPicker(null);
+  };
+
+  const displayStreak =
+    streakReset === '12:00 AM' ? 'Midnight' : streakReset;
 
   return (
     <GradientBackground>
@@ -127,8 +128,11 @@ export default function SettingsScreen() {
             <Row
               icon={<RefreshCw size={18} color={colors.crimsonGlow} strokeWidth={2} />}
               label="Streak Reset Time"
-              value={streakReset}
-              onPress={cycleStreak}
+              value={displayStreak}
+              onPress={() => {
+                haptic.light();
+                setPicker('streak');
+              }}
               testID="setting-streak-reset"
             />
           </Animated.View>
@@ -144,7 +148,10 @@ export default function SettingsScreen() {
               label="Day Starts"
               sublabel="When your day begins"
               value={dayStart}
-              onPress={cycleDayStart}
+              onPress={() => {
+                haptic.light();
+                setPicker('start');
+              }}
               testID="setting-day-starts"
             />
             <Divider />
@@ -153,7 +160,10 @@ export default function SettingsScreen() {
               label="Day Ends"
               sublabel="When you wind down"
               value={dayEnd}
-              onPress={cycleDayEnd}
+              onPress={() => {
+                haptic.light();
+                setPicker('end');
+              }}
               testID="setting-day-ends"
             />
 
@@ -205,6 +215,14 @@ export default function SettingsScreen() {
           <View style={{ height: 120 }} />
         </ScrollView>
       </SafeAreaView>
+
+      <TimePickerSheet
+        visible={picker !== null}
+        title={pickerTitle}
+        initial={pickerValue}
+        onClose={() => setPicker(null)}
+        onConfirm={onPickerConfirm}
+      />
     </GradientBackground>
   );
 }
